@@ -9,21 +9,15 @@ type TableRideIndegoMaster struct {
 	FeatureType string    `db:"feature_type"`
 }
 
-type TableRideIndegoBikes struct {
+type TableRideIndegoFeatures struct {
 	// FetchID : identifies which fetch data group does this corresponds to
 	FetchID string `db:"fetch_id"`
 
 	// FeatureID : identifies which feature index does this bikes belong to
-	FeatureID int `db:"feature_id"`
-
-	// PropertiesID : identifies which properties is this.
-	// Corresponds to properties.id in APIResponse
-	PropertiesID int `db:"properties_id"`
-
-	DockNumber  int  `db:"dock_number"`
-	IsElectric  bool `db:"is_electric"`
-	IsAvailable bool `db:"is_available"`
-	Battery     int  `db:"battery"`
+	FeatureID   int    `db:"feature_id"`
+	FeatureType string `db:"feature_type"`
+	GeoType     string `db:"geo_type"`
+	GeoCoord    string `db:"geo_coord"`
 }
 
 type TableRideIndegoProperties struct {
@@ -35,37 +29,37 @@ type TableRideIndegoProperties struct {
 
 	// PropertiesID : identifies which properties is this.
 	// Corresponds to properties.id in APIResponse
-	PropertiesID int `db:"id"`
+	PropertiesID int `db:"properties_id"`
 
 	// Coordinates is POINT type in database, parse it!
 	Coordinates string `db:"coordinates"`
 
 	Name                  string `db:"name"`
-	TotalDocks            int    `db:"totalDocks"`
-	DocksAvailable        int    `db:"docksAvailable"`
-	BikesAvailable        int    `db:"bikesAvailable"`
-	ClassicBikesAvailable int    `db:"classicBikesAvailable"`
-	SmartBikesAvailable   int    `db:"smartBikesAvailable"`
-	EletricBikesAvailable int    `db:"eletricBikesAvailable"`
-	RewardBikesAvailable  int    `db:"rewardBikesAvailable"`
-	RewardDocksAvailable  int    `db:"rewardDocksAvailable"`
-	KioskStatus           string `db:"kioskStatus"`
-	KioskPublicStatus     string `db:"kioskPublicStatus"`
-	KioskConnectionStatus string `db:"kioskConnectionStatus"`
-	KioskType             int    `db:"kioskType"`
-	AddressStreet         string `db:"addressStreet"`
-	AddressCity           string `db:"addressCity"`
-	AddressState          string `db:"addressState"`
-	AddressZipCode        string `db:"addressZipCode"`
-	CloseTime             string `db:"closeTime"`
-	EventEnd              string `db:"eventEnd"`
-	EventStart            string `db:"eventStart"`
-	IsEventBased          bool   `db:"isEventBased"`
-	IsVirtual             bool   `db:"isVirtual"`
-	KioskID               int    `db:"kioskId"`
+	TotalDocks            int    `db:"total_docks"`
+	DocksAvailable        int    `db:"docks_available"`
+	BikesAvailable        int    `db:"bikes_available"`
+	ClassicBikesAvailable int    `db:"classic_bikes_available"`
+	SmartBikesAvailable   int    `db:"smart_bikes_available"`
+	EletricBikesAvailable int    `db:"eletric_bikes_available"`
+	RewardBikesAvailable  int    `db:"reward_bikes_available"`
+	RewardDocksAvailable  int    `db:"reward_docks_available"`
+	KioskStatus           string `db:"kiosk_status"`
+	KioskPublicStatus     string `db:"kiosk_public_status"`
+	KioskConnectionStatus string `db:"kiosk_connection_status"`
+	KioskType             int    `db:"kiosk_type"`
+	AddressStreet         string `db:"address_street"`
+	AddressCity           string `db:"address_city"`
+	AddressState          string `db:"address_state"`
+	AddressZipCode        string `db:"address_zip_code"`
+	CloseTime             string `db:"close_time"`
+	EventEnd              string `db:"event_end"`
+	EventStart            string `db:"event_start"`
+	IsEventBased          bool   `db:"is_event_based"`
+	IsVirtual             bool   `db:"is_virtual"`
+	KioskID               int    `db:"kiosk_id"`
 	Notes                 string `db:"notes"`
-	OpenTime              string `db:"openTime"`
-	PublicText            string `db:"publicText"`
+	OpenTime              string `db:"open_time"`
+	PublicText            string `db:"public_text"`
 	Timezone              string `db:"timezone"`
-	TrikesAvailable       int    `db:"trikesAvailable"`
+	TrikesAvailable       int    `db:"trikes_available"`
 }
