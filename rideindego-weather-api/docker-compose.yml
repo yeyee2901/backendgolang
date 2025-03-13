@@ -1,16 +1,35 @@
 version: '20.1'
 
 services:
-  db:
+  postgresdb:
     image: bitnami/postgresql:latest
     env_file: "build.env"
     volumes:
-      - ./sql/data/pg_data:/bitnami/postgresql
-      - ./sql/migrations:/docker-entrypoint-initdb.d/:ro
-    ports:
-      - '5432:5432'
+      - ./sql/data:/bitnami/postgresql
+    ports: 
+      - '34567:5432'
     networks:
       - epiphyte-corp-dot-net
+    healthcheck:
+      test: pg_isready -U mydbuser -d mydbname
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: migrate/migrate
+    env_file: "build.env"
+    networks:
+      - epiphyte-corp-dot-net
+    volumes:
+      - ./sql/migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "postgres://postgres:your_password@postgresdb/epiphyte?sslmode=disable", "up" ]
+    links: 
+      - postgresdb
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+
 
 networks:
   epiphyte-corp-dot-net:

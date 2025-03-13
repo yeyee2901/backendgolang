@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
+	"github.com/yeyee2901/backendgolang/rideindego-weather-api/internal/utils"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -176,29 +177,20 @@ func connectDB() (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	datasource := fmt.Sprintf(
-		"postgres://%s:%s@%s/%s?sslmode=disable&timezone=UTC",
-		os.Getenv("POSTGRESQL_USERNAME"),
-		os.Getenv("POSTGRESQL_PASSWORD"),
-		os.Getenv("POSTGRESQL_HOST"),
-		os.Getenv("POSTGRESQL_DATABASE"),
-	)
-
-	return sqlx.Connect("postgres", datasource)
+	return sqlx.Connect("postgres", utils.BuildDatasourceName(utils.DataSource{
+		User:     os.Getenv("POSTGRESQL_USERNAME"),
+		Password: os.Getenv("POSTGRESQL_PASSWORD"),
+		Host:     os.Getenv("POSTGRESQL_HOST"),
+		Database: os.Getenv("POSTGRESQL_DATABASE"),
+	}))
 }
 
 func cleanDatabase(conn *sqlx.DB) error {
-	q1 := `
-        DELETE FROM rideindego_master
-    `
+	q1 := ` DELETE FROM rideindego_master `
 
-	q2 := `
-        DELETE FROM rideindego_features
-    `
+	q2 := ` DELETE FROM rideindego_features `
 
-	q3 := `
-        DELETE FROM rideindego_properties
-    `
+	q3 := ` DELETE FROM rideindego_properties `
 
 	tx, err := conn.Beginx()
 	if err != nil {
