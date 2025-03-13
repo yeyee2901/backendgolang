@@ -21,6 +21,7 @@ type Geometry struct {
 	Type        string    `json:"type"`
 }
 
+// Bikes : part of API Response
 type Bikes struct {
 	DockNumber  int  `json:"dockNumber"`
 	IsElectric  bool `json:"isElectric"`
@@ -30,7 +31,7 @@ type Bikes struct {
 
 // FeatureProperties : part of API Response
 type FeatureProperties struct {
-	ID                    int       `json:"id"`
+	PropertiesID          int       `json:"id"`
 	Name                  string    `json:"name"`
 	Coordinates           []float64 `json:"coordinates"`
 	TotalDocks            int       `json:"totalDocks"`
