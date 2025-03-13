@@ -1,6 +1,8 @@
 package db
 
 import (
+	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -11,7 +13,7 @@ import (
 // ride indego data.
 type DBRideIndegoProvider interface {
 	// StoreDatas stores the data to the database
-	StoreDatas(master *TableRideIndegoMaster, features []*TableRideIndegoFeatures, properties []*TableRideIndegoProperties, bikes []*TableRideIndegoBikes) error
+	StoreDatas(context.Context, *TableRideIndegoMaster, []*TableRideIndegoFeatures, []*TableRideIndegoProperties, []*TableRideIndegoBikes) error
 }
 
 // DBRideIndego is used to interact with Ride Indego data
@@ -28,13 +30,14 @@ func NewDBRideIndego(db *sqlx.DB) DBRideIndegoProvider {
 }
 
 func (db *dbRideIndego) StoreDatas(
+	ctx context.Context,
 	master *TableRideIndegoMaster,
 	features []*TableRideIndegoFeatures,
 	properties []*TableRideIndegoProperties,
 	bikes []*TableRideIndegoBikes,
 ) error {
 	// begin transaction
-	tx, err := db.conn.Beginx()
+	tx, err := db.conn.BeginTxx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return errors.Join(ErrRideIndegoDB, err)
 	}
@@ -120,7 +123,6 @@ func (db *dbRideIndego) bulkSaveFeatures(tx *sqlx.Tx, param []*TableRideIndegoFe
         )
     `
 
-	fmt.Println(param)
 	_, err := tx.NamedExec(q, param)
 	if err != nil {
 		return fmt.Errorf("failed to insert rideindego features: %w", err)

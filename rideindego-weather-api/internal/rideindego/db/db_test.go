@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -185,7 +186,7 @@ func TestStoreDatas(t *testing.T) {
 	})
 
 	db := &dbRideIndego{conn}
-	err = db.StoreDatas(testMaster, testFeatures, testProperties, testBikes)
+	err = db.StoreDatas(context.Background(), testMaster, testFeatures, testProperties, testBikes)
 	if err != nil {
 		t.Fatal(err)
 	}

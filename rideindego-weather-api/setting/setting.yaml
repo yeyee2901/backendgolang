@@ -1,8 +1,0 @@
-app:
-  port: 3000
-
-rideindego:
-  stations_url: https://www.rideindego.com/stations/json/
-
-openweather:
-  api_key: f9d9256c930a0fb9be9a9c7738927719

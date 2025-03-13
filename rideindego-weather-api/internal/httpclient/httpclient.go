@@ -2,6 +2,7 @@ package httpclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 )
 
 func HTTPRequest(
+	ctx context.Context,
 	method string,
 	headers map[string]string,
 	endpoint string,
@@ -26,7 +28,7 @@ func HTTPRequest(
 		payload = bytes.NewBuffer([]byte{})
 	}
 
-	httpReq, err := http.NewRequest(method, u.String(), payload)
+	httpReq, err := http.NewRequestWithContext(ctx, method, u.String(), payload)
 	if err != nil {
 		return 0, err
 	}

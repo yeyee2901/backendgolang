@@ -1,6 +1,7 @@
 package httpclient_test
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -11,7 +12,7 @@ func TestHTTPClient(t *testing.T) {
 	rideindegoURL := "https://www.rideindego.com/stations/json/"
 
 	resp := map[string]any{}
-	status, err := httpclient.HTTPRequest(http.MethodGet, nil, rideindegoURL, nil, &resp)
+	status, err := httpclient.HTTPRequest(context.Background(), http.MethodGet, nil, rideindegoURL, nil, &resp)
 	if err != nil {
 		t.Fatal(err)
 	}

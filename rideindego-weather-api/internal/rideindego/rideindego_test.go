@@ -1,6 +1,7 @@
 package rideindego
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -21,7 +22,7 @@ func TestFetchData(t *testing.T) {
 	}
 
 	ride := NewRideIndeGoService(os.Getenv("RIDE_INDEGO_URL"), dbConn)
-	resp, err := ride.fetchData()
+	resp, err := ride.fetchData(context.Background())
 	if err != nil {
 		t.Fatal("failed to fetch:", err)
 	}
@@ -65,7 +66,7 @@ func TestRefreshData(t *testing.T) {
 	})
 
 	ride := NewRideIndeGoService(os.Getenv("RIDE_INDEGO_URL"), dbConn)
-	freshData, err := ride.RefreshData()
+	freshData, err := ride.RefreshData(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}

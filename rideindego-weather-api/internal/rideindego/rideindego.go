@@ -1,6 +1,7 @@
 package rideindego
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -24,14 +25,14 @@ func NewRideIndeGoService(baseURL string, dbConn *sqlx.DB) *RideIndeGoService {
 }
 
 // RefreshData fetches a fresh data from the external API & stores it in the database
-func (ri *RideIndeGoService) RefreshData() (*APIResponse, error) {
-	apiResp, err := ri.fetchData()
+func (ri *RideIndeGoService) RefreshData(ctx context.Context) (*APIResponse, error) {
+	apiResp, err := ri.fetchData(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch data: %w", err)
 	}
 
 	// save to DB
-	err = ri.saveData(apiResp)
+	err = ri.saveData(ctx, apiResp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save data: %w", err)
 	}
@@ -40,9 +41,9 @@ func (ri *RideIndeGoService) RefreshData() (*APIResponse, error) {
 }
 
 // fetchData fetches the data from the external API
-func (ri *RideIndeGoService) fetchData() (*APIResponse, error) {
+func (ri *RideIndeGoService) fetchData(ctx context.Context) (*APIResponse, error) {
 	resp := new(APIResponse)
-	status, err := httpclient.HTTPRequest(http.MethodGet, nil, ri.baseURL, nil, resp)
+	status, err := httpclient.HTTPRequest(ctx, http.MethodGet, nil, ri.baseURL, nil, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +56,7 @@ func (ri *RideIndeGoService) fetchData() (*APIResponse, error) {
 }
 
 // saveData saves the data to DB based on the API Response
-func (ri *RideIndeGoService) saveData(dataToSave *APIResponse) error {
+func (ri *RideIndeGoService) saveData(ctx context.Context, dataToSave *APIResponse) error {
 	fetchID := uuid.NewString()
 	baseFeatureID := int(dataToSave.LastUpdated.Unix() - 1000)
 	dataMaster := &db.TableRideIndegoMaster{
@@ -132,5 +133,5 @@ func (ri *RideIndeGoService) saveData(dataToSave *APIResponse) error {
 		}
 	}
 
-	return ri.store.StoreDatas(dataMaster, dataFeatures, dataProperties, dataBikes)
+	return ri.store.StoreDatas(ctx, dataMaster, dataFeatures, dataProperties, dataBikes)
 }
