@@ -6,7 +6,7 @@ type TableRideIndegoMaster struct {
 	// FetchID : identifies which fetch data group does this corresponds to
 	FetchID     string    `db:"fetch_id"`
 	LastUpdated time.Time `db:"last_updated"`
-	FeatureType string    `db:"feature_type"`
+	DataType    string    `db:"data_type"`
 }
 
 type TableRideIndegoFeatures struct {

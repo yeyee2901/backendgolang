@@ -3,7 +3,7 @@
 clean:
 	rm -rf ./sql/data
 
-docker-up: clean
+docker-up:
 	docker-compose up -d --remove-orphans
 
 docker-down:

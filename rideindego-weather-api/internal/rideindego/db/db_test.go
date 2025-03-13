@@ -18,17 +18,19 @@ func TestSaveRideIndegoMaster(t *testing.T) {
 	var (
 		testDataFetchID     = uuid.NewString()
 		testDataLastUpdated = time.Now()
-		testDataFeatureType = "test"
+		testDataDataType    = "test"
 	)
 	conn, err := connectDB()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = cleanDatabase(conn)
-	if err != nil {
-		t.Fatal("failed to clean database:", err)
-	}
+	t.Cleanup(func() {
+		err := cleanDatabase(conn)
+		if err != nil {
+			t.Log("[WARNING] failed to clean database:", err)
+		}
+	})
 
 	db := &dbRideIndego{conn}
 	tx, err := conn.Beginx()
@@ -39,7 +41,7 @@ func TestSaveRideIndegoMaster(t *testing.T) {
 	err = db.saveMaster(tx, &TableRideIndegoMaster{
 		FetchID:     testDataFetchID,
 		LastUpdated: testDataLastUpdated,
-		FeatureType: testDataFeatureType,
+		DataType:    testDataDataType,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -51,9 +53,9 @@ func TestSaveRideIndegoMaster(t *testing.T) {
 	}
 
 	// check the data
-	q := `SELECT * FROM rideindego_master WHERE fetch_id = $1 AND feature_type = $2`
+	q := `SELECT * FROM rideindego_master WHERE fetch_id = $1 AND data_type = $2`
 	res := new(TableRideIndegoMaster)
-	err = conn.Get(res, q, testDataFetchID, testDataFeatureType)
+	err = conn.Get(res, q, testDataFetchID, testDataDataType)
 	if err != nil {
 		t.Fatal("could not load test data:", err)
 	}
@@ -69,10 +71,12 @@ func TestSaveFeatures(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = cleanDatabase(conn)
-	if err != nil {
-		t.Fatal("failed to clean database:", err)
-	}
+	t.Cleanup(func() {
+		err := cleanDatabase(conn)
+		if err != nil {
+			t.Log("[WARNING] failed to clean database:", err)
+		}
+	})
 
 	db := &dbRideIndego{conn}
 	tx, err := conn.Beginx()
@@ -106,7 +110,7 @@ func TestStoreDatas(t *testing.T) {
 		testMaster = &TableRideIndegoMaster{
 			FetchID:     randUUID,
 			LastUpdated: now,
-			FeatureType: "test",
+			DataType:    "test",
 		}
 		testFeatures = []*TableRideIndegoFeatures{
 			{
@@ -173,13 +177,15 @@ func TestStoreDatas(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = cleanDatabase(conn)
-	if err != nil {
-		t.Fatal("failed to clean database:", err)
-	}
+	t.Cleanup(func() {
+		err := cleanDatabase(conn)
+		if err != nil {
+			t.Log("[WARNING] failed to clean database:", err)
+		}
+	})
 
 	db := &dbRideIndego{conn}
-	err = db.storeDatas(testMaster, testFeatures, testProperties, testBikes)
+	err = db.StoreDatas(testMaster, testFeatures, testProperties, testBikes)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,33 +206,28 @@ func connectDB() (*sqlx.DB, error) {
 }
 
 func cleanDatabase(conn *sqlx.DB) error {
-	q1 := ` DELETE FROM rideindego_master `
-
-	q2 := ` DELETE FROM rideindego_features `
-
-	q3 := ` DELETE FROM rideindego_properties `
+	queries := []string{
+		` DELETE FROM rideindego_master `,
+		` DELETE FROM rideindego_features `,
+		` DELETE FROM rideindego_properties `,
+		` DELETE FROM rideindego_bikes `,
+	}
 
 	tx, err := conn.Beginx()
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.Exec(q1)
-	if err != nil {
-		return err
-	}
-
-	_, err = tx.Exec(q2)
-	if err != nil {
-		return err
-	}
-
-	_, err = tx.Exec(q3)
-	if err != nil {
-		return err
+	for _, q := range queries {
+		_, err = tx.Exec(q)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
+		tx.Rollback()
 		return err
 	}
 

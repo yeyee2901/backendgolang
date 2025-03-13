@@ -2,7 +2,7 @@ CREATE EXTENSION postgis;
 
 CREATE TABLE rideindego_master (
     fetch_id uuid,
-    feature_type varchar(25) NOT NULL,
+    data_type varchar(25) NOT NULL,
     last_updated timestamp WITH TIME ZONE NOT NULL,
 
     PRIMARY KEY(fetch_id)

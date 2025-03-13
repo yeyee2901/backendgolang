@@ -13,6 +13,7 @@ type APIResponse struct {
 type FeatureElement struct {
 	Geometry   Geometry          `json:"geometry"`
 	Properties FeatureProperties `json:"properties"`
+	Type       string            `json:"type"`
 }
 
 // Geometry : part of API Response

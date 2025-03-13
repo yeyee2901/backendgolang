@@ -9,7 +9,10 @@ import (
 
 // DBRideIndegoProvider is the interface used to interact with
 // ride indego data.
-type DBRideIndegoProvider interface{}
+type DBRideIndegoProvider interface {
+	// StoreDatas stores the data to the database
+	StoreDatas(master *TableRideIndegoMaster, features []*TableRideIndegoFeatures, properties []*TableRideIndegoProperties, bikes []*TableRideIndegoBikes) error
+}
 
 // DBRideIndego is used to interact with Ride Indego data
 type dbRideIndego struct {
@@ -24,7 +27,12 @@ func NewDBRideIndego(db *sqlx.DB) DBRideIndegoProvider {
 	}
 }
 
-func (db *dbRideIndego) storeDatas(master *TableRideIndegoMaster, features []*TableRideIndegoFeatures, properties []*TableRideIndegoProperties, bikes []*TableRideIndegoBikes) error {
+func (db *dbRideIndego) StoreDatas(
+	master *TableRideIndegoMaster,
+	features []*TableRideIndegoFeatures,
+	properties []*TableRideIndegoProperties,
+	bikes []*TableRideIndegoBikes,
+) error {
 	// begin transaction
 	tx, err := db.conn.Beginx()
 	if err != nil {
@@ -34,29 +42,34 @@ func (db *dbRideIndego) storeDatas(master *TableRideIndegoMaster, features []*Ta
 	// store master
 	err = db.saveMaster(tx, master)
 	if err != nil {
+		tx.Rollback()
 		return errors.Join(ErrRideIndegoDB, err)
 	}
 
 	// store features
 	err = db.bulkSaveFeatures(tx, features)
 	if err != nil {
+		tx.Rollback()
 		return errors.Join(ErrRideIndegoDB, err)
 	}
 
 	// store properties
 	err = db.bulkSaveProperties(tx, properties)
 	if err != nil {
+		tx.Rollback()
 		return errors.Join(ErrRideIndegoDB, err)
 	}
 
 	// store bikes
 	err = db.bulkSaveBikes(tx, bikes)
 	if err != nil {
+		tx.Rollback()
 		return errors.Join(ErrRideIndegoDB, err)
 	}
 
 	// commit
 	if err := tx.Commit(); err != nil {
+		tx.Rollback()
 		return errors.Join(ErrRideIndegoDB, err)
 	}
 
@@ -68,13 +81,13 @@ func (db *dbRideIndego) saveMaster(tx *sqlx.Tx, param *TableRideIndegoMaster) er
         INSERT INTO rideindego_master
         (
             fetch_id,
-            feature_type,
+            data_type,
             last_updated
         )
         VALUES
         (
             :fetch_id,
-            :feature_type,
+            :data_type,
             :last_updated
         )
     `
@@ -107,6 +120,7 @@ func (db *dbRideIndego) bulkSaveFeatures(tx *sqlx.Tx, param []*TableRideIndegoFe
         )
     `
 
+	fmt.Println(param)
 	_, err := tx.NamedExec(q, param)
 	if err != nil {
 		return fmt.Errorf("failed to insert rideindego features: %w", err)
