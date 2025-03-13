@@ -1,0 +1,16 @@
+version: '20.1'
+
+services:
+  db:
+    image: bitnami/postgresql:latest
+    env_file: "build.env"
+    volumes:
+      - ./sql/data/pg_data:/bitnami/postgresql
+      - ./sql/migrations:/docker-entrypoint-initdb.d/:ro
+    ports:
+      - '5432:5432'
+    networks:
+      - epiphyte-corp-dot-net
+
+networks:
+  epiphyte-corp-dot-net:
