@@ -60,6 +60,8 @@ func TestSaveRideIndegoMaster(t *testing.T) {
 	if err != nil {
 		t.Fatal("could not load test data:", err)
 	}
+
+	t.Logf("res.DataType: %v\n", res.DataType)
 }
 
 func TestSaveFeatures(t *testing.T) {

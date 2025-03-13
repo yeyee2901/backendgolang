@@ -27,6 +27,9 @@ type APIConfig struct {
 	SecretKey            string
 	RideIndegoBaseURL    string
 	ServerTimeoutSeconds int
+
+	OpenWeatherURL    string
+	OpenWeatherAPIKey string
 }
 
 func NewAPIServer(db *sqlx.DB, config *APIConfig) *APIServer {

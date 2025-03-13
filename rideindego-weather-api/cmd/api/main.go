@@ -45,6 +45,8 @@ func main() {
 		SecretKey:            os.Getenv("SERVER_SECRET_TOKEN"),
 		RideIndegoBaseURL:    os.Getenv("RIDE_INDEGO_URL"),
 		ServerTimeoutSeconds: timeoutSeconds,
+		OpenWeatherURL:       os.Getenv("OPENWEATHER_URL"),
+		OpenWeatherAPIKey:    os.Getenv("OPENWEATHER_API_KEY"),
 	}
 
 	server := api.NewAPIServer(db, cfg)

@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yeyee2901/backendgolang/rideindego-weather-api/internal/openweather"
 	"github.com/yeyee2901/backendgolang/rideindego-weather-api/internal/rideindego"
 )
 
@@ -43,13 +44,15 @@ func (api *APIServer) HandleRefreshData(c *gin.Context) {
 		doneRideIndego <- struct{}{}
 	}()
 
-	// TODO: refresh weather data (concurrent)
+	// refresh weather data (concurrent)
 	go func() {
-		// ride := rideindego.NewRideIndeGoService(api.rideindegoBaseURL, api.dbConn)
-		// _, err := ride.RefreshData(refreshCtx)
-		// if err != nil {
-		// 	errors <- err
-		// }
+		weather := openweather.NewOpenWeather(api.config.OpenWeatherAPIKey, api.config.OpenWeatherURL, api.dbConn)
+		err := weather.RefreshData(refreshCtx)
+		if err != nil {
+			errWeatherChan <- err
+			doneWeather <- struct{}{}
+			return
+		}
 
 		close(errWeatherChan)
 		doneWeather <- struct{}{}
