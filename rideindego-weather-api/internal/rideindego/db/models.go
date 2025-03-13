@@ -63,3 +63,22 @@ type TableRideIndegoProperties struct {
 	Timezone              string `db:"timezone"`
 	TrikesAvailable       int    `db:"trikes_available"`
 }
+
+type TableRideIndegoBikes struct {
+	// FetchID : identifies which fetch group does this bike belongs to
+	FetchID string `db:"fetch_id"`
+
+	// FeatureID : identifies which feature does this bike belongs to
+	FeatureID int `db:"feature_id"`
+
+	// PropertiesID : identifies which properties does this bike belongs to
+	PropertiesID int `db:"properties_id"`
+
+	// ID : bike ID. Unique per instance & time
+	ID int `db:"id"`
+
+	DockNumber  int  `db:"dock_number"`
+	IsElectric  bool `db:"is_electric"`
+	IsAvailable bool `db:"is_available"`
+	Battery     int  `db:"battery"`
+}

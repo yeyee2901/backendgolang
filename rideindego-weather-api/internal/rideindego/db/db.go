@@ -24,7 +24,7 @@ func NewDBRideIndego(db *sqlx.DB) DBRideIndegoProvider {
 	}
 }
 
-func (db *dbRideIndego) storeDatas(master *TableRideIndegoMaster, features []*TableRideIndegoFeatures, properties []*TableRideIndegoProperties) error {
+func (db *dbRideIndego) storeDatas(master *TableRideIndegoMaster, features []*TableRideIndegoFeatures, properties []*TableRideIndegoProperties, bikes []*TableRideIndegoBikes) error {
 	// begin transaction
 	tx, err := db.conn.Beginx()
 	if err != nil {
@@ -49,11 +49,11 @@ func (db *dbRideIndego) storeDatas(master *TableRideIndegoMaster, features []*Ta
 		return errors.Join(ErrRideIndegoDB, err)
 	}
 
-	// TODO: store bikes
-	// err = db.saveBikes(tx, bikes)
-	// if err != nil {
-	// 	return errors.Join(ErrRideIndegoDB, err)
-	// }
+	// store bikes
+	err = db.bulkSaveBikes(tx, bikes)
+	if err != nil {
+		return errors.Join(ErrRideIndegoDB, err)
+	}
 
 	// commit
 	if err := tx.Commit(); err != nil {
@@ -186,6 +186,40 @@ func (db *dbRideIndego) bulkSaveProperties(tx *sqlx.Tx, param []*TableRideIndego
             :public_text,
             :timezone,
             :trikes_available
+        )
+    `
+
+	_, err := tx.NamedExec(q, param)
+	if err != nil {
+		return fmt.Errorf("failed to insert rideindego properties: %w", err)
+	}
+
+	return nil
+}
+
+func (db *dbRideIndego) bulkSaveBikes(tx *sqlx.Tx, param []*TableRideIndegoBikes) error {
+	q := `
+        INSERT INTO rideindego_bikes
+        (
+            fetch_id,
+            feature_id,
+            properties_id,
+            id,
+            dock_number,
+            is_electric,
+            is_available,
+            battery
+        )
+        VALUES
+        (
+            :fetch_id,
+            :feature_id,
+            :properties_id,
+            :id,
+            :dock_number,
+            :is_electric,
+            :is_available,
+            :battery
         )
     `
 

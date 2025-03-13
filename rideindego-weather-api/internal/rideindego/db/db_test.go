@@ -45,7 +45,8 @@ func TestSaveRideIndegoMaster(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := tx.Commit(); err != nil {
+	err = tx.Commit()
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -152,6 +153,19 @@ func TestStoreDatas(t *testing.T) {
 				TrikesAvailable:       0,
 			},
 		}
+
+		testBikes = []*TableRideIndegoBikes{
+			{
+				FetchID:      randUUID,
+				FeatureID:    1,
+				PropertiesID: 1,
+				ID:           1,
+				DockNumber:   1,
+				IsElectric:   false,
+				IsAvailable:  false,
+				Battery:      30,
+			},
+		}
 	)
 
 	conn, err := connectDB()
@@ -165,7 +179,7 @@ func TestStoreDatas(t *testing.T) {
 	}
 
 	db := &dbRideIndego{conn}
-	err = db.storeDatas(testMaster, testFeatures, testProperties)
+	err = db.storeDatas(testMaster, testFeatures, testProperties, testBikes)
 	if err != nil {
 		t.Fatal(err)
 	}
