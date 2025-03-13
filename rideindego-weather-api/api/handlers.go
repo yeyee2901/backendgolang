@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,7 @@ import (
 // @Consume json
 // @Router /api/v1/indego-data-fetch-and-store-it-db [post]
 func (api *APIServer) HandleRefreshData(c *gin.Context) {
+	logger := slog.Default().With("endpoint", "POST /api/v1/indego-data-fetch-and-store-it-db")
 	refreshCtx, cancel := context.WithCancel(c)
 	defer cancel()
 
@@ -61,6 +63,7 @@ func (api *APIServer) HandleRefreshData(c *gin.Context) {
 	errWeather := <-errWeatherChan
 
 	if err := errors.Join(errRideIndego, errWeather); err != nil {
+		logger.Error("failed to save", "error", err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error": fmt.Sprint("failed to refresh data:", err),
 		})
@@ -68,5 +71,6 @@ func (api *APIServer) HandleRefreshData(c *gin.Context) {
 		return
 	}
 
+	logger.Info("refreshed database with fresh data")
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }

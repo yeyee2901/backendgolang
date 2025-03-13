@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	"github.com/yeyee2901/backendgolang/rideindego-weather-api/api"
+	"github.com/yeyee2901/backendgolang/rideindego-weather-api/internal/logging"
 	"github.com/yeyee2901/backendgolang/rideindego-weather-api/internal/utils"
 )
 
@@ -23,9 +25,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	// setup logger
+	logger := logging.NewFileLogger("log/api.log", "rideindego-weather-api", slog.LevelInfo)
+	slog.SetDefault(logger)
+
 	db, err := connectDB()
 	if err != nil {
-		fmt.Println("Cannot connect to database")
+		slog.Error("Cannot connect to database")
 		os.Exit(1)
 	}
 
@@ -40,7 +46,6 @@ func main() {
 		RideIndegoBaseURL:    os.Getenv("RIDE_INDEGO_URL"),
 		ServerTimeoutSeconds: timeoutSeconds,
 	}
-	fmt.Println(cfg)
 
 	server := api.NewAPIServer(db, cfg)
 
@@ -50,7 +55,7 @@ func main() {
 	errChan := server.Run()
 	err = <-errChan
 	if err != nil {
-		fmt.Println("Server exited")
+		slog.Error("Server exited")
 		os.Exit(1)
 	}
 }
