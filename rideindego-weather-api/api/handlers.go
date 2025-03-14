@@ -101,6 +101,17 @@ func (api *APIServer) HandleSearchByTime(c *gin.Context) {
 	}
 
 	// TODO: search ride indego data (should return the same JSON as the API)
+	ride := rideindego.NewRideIndeGoService(api.config.RideIndegoBaseURL, api.dbConn)
+	rideData, err := ride.Search(searchCtx, rideindego.SearchParam{At: at})
+	if err != nil {
+		if errors.Is(err, rideindego.ErrDataNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "no matching ride indego data found"})
+			return
+		}
+
+		logger.Error("failed to get data", "error", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+	}
 
 	// search weather data (should return the same JSON as the API)
 	weather := openweather.NewOpenWeather(api.config.OpenWeatherAPIKey, api.config.OpenWeatherURL, api.dbConn)
@@ -117,7 +128,7 @@ func (api *APIServer) HandleSearchByTime(c *gin.Context) {
 
 	c.JSON(http.StatusOK, APIResponse{
 		At:       at,
-		Stations: rideindego.APIResponse{},
+		Stations: *rideData,
 		Weather:  *weatherData,
 	})
 }

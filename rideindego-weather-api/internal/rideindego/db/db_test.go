@@ -172,6 +172,16 @@ func TestStoreDatas(t *testing.T) {
 				IsAvailable:  false,
 				Battery:      30,
 			},
+			{
+				FetchID:      randUUID,
+				FeatureID:    1,
+				PropertiesID: 1,
+				ID:           2,
+				DockNumber:   1,
+				IsElectric:   false,
+				IsAvailable:  false,
+				Battery:      40,
+			},
 		}
 	)
 
@@ -192,6 +202,118 @@ func TestStoreDatas(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestSearchData(t *testing.T) {
+	// PRETEST: store datas first
+	var (
+		randUUID = uuid.NewString()
+		now      = time.Now()
+
+		testMaster = &TableRideIndegoMaster{
+			FetchID:     randUUID,
+			LastUpdated: now,
+			DataType:    "test",
+		}
+		testFeatures = []*TableRideIndegoFeatures{
+			{
+				FetchID:     randUUID,
+				FeatureID:   1,
+				FeatureType: "test",
+				GeoType:     "test",
+				GeoCoord:    fmt.Sprintf("POINT(%f %f)", 0.123, 0.345),
+			},
+		}
+		testProperties = []*TableRideIndegoProperties{
+			{
+				FetchID:               randUUID,
+				FeatureID:             1,
+				PropertiesID:          1,
+				Coordinates:           fmt.Sprintf("POINT(%f %f)", 0.123, 0.345),
+				Name:                  "",
+				TotalDocks:            0,
+				DocksAvailable:        0,
+				BikesAvailable:        0,
+				ClassicBikesAvailable: 0,
+				SmartBikesAvailable:   0,
+				EletricBikesAvailable: 0,
+				RewardBikesAvailable:  0,
+				RewardDocksAvailable:  0,
+				KioskStatus:           "",
+				KioskPublicStatus:     "",
+				KioskConnectionStatus: "",
+				KioskType:             0,
+				AddressStreet:         "",
+				AddressCity:           "",
+				AddressState:          "",
+				AddressZipCode:        "",
+				CloseTime:             "",
+				EventEnd:              "",
+				EventStart:            "",
+				IsEventBased:          false,
+				IsVirtual:             false,
+				KioskID:               0,
+				Notes:                 "",
+				OpenTime:              "",
+				PublicText:            "",
+				Timezone:              "",
+				TrikesAvailable:       0,
+			},
+		}
+
+		testBikes = []*TableRideIndegoBikes{
+			{
+				FetchID:      randUUID,
+				FeatureID:    1,
+				PropertiesID: 1,
+				ID:           1,
+				DockNumber:   1,
+				IsElectric:   false,
+				IsAvailable:  false,
+				Battery:      30,
+			},
+			{
+				FetchID:      randUUID,
+				FeatureID:    1,
+				PropertiesID: 1,
+				ID:           2,
+				DockNumber:   1,
+				IsElectric:   false,
+				IsAvailable:  false,
+				Battery:      20,
+			},
+		}
+	)
+
+	conn, err := connectDB()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		err := cleanDatabase(conn)
+		if err != nil {
+			t.Log("[WARNING] failed to clean database:", err)
+		}
+	})
+
+	db := &dbRideIndego{conn}
+	err = db.StoreDatas(context.Background(), testMaster, testFeatures, testProperties, testBikes)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// TEST: test the search
+	kioskID := ""
+	res, err := db.SearchData(context.Background(), now, kioskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("master: %+v", res.Master)
+	t.Logf("features[0]: %+v", res.Features[0])
+	t.Logf("properties: %+v", res.Properties)
+	t.Logf("bikes: %+v", res.Bike)
 }
 
 func connectDB() (*sqlx.DB, error) {

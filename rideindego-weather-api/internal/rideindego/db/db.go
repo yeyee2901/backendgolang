@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -14,6 +15,10 @@ import (
 type DBRideIndegoProvider interface {
 	// StoreDatas stores the data to the database
 	StoreDatas(context.Context, *TableRideIndegoMaster, []*TableRideIndegoFeatures, []*TableRideIndegoProperties, []*TableRideIndegoBikes) error
+
+	// SearchData searches the data based on parameter.
+	// Time is mandatory, others are optional
+	SearchData(c context.Context, at time.Time, kioskID string) (*SearchDataResult, error)
 }
 
 // DBRideIndego is used to interact with Ride Indego data
