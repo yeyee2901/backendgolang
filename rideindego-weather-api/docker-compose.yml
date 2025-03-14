@@ -12,7 +12,7 @@ services:
     networks:
       - epiphyte-corp-dot-net
     healthcheck:
-      test: pg_isready -U mydbuser -d mydbname
+      test: pg_isready -U postgres -d epiphyte
       interval: 3s
       timeout: 5s
       retries: 5
@@ -51,6 +51,25 @@ services:
     depends_on:
       postgresdb:
         condition: service_healthy
+    volumes:
+      - ./docker_log:/log
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: scheduler.Dockerfile
+    restart: always
+
+    # NOTE: set the scheduling here
+    environment:
+      - SCHEDULER_REFRESH_URL=http://api:3000/api/v1/indego-data-fetch-and-store-it-db
+      - SCHEDULER_REFRESH_INTERVAL=1h
+      # - SCHEDULER_REFRESH_INTERVAL=3m
+    networks:
+      - epiphyte-corp-dot-net
+    depends_on:
+      - postgresdb
+      - api
     volumes:
       - ./docker_log:/log
 

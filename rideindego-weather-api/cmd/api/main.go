@@ -26,7 +26,7 @@ func main() {
 	}
 
 	// setup logger
-	logger := logging.NewFileLogger("log/api.log", "rideindego-weather-api", slog.LevelInfo)
+	logger := logging.NewFileLogger("log/app.log", "rideindego-weather-api", slog.LevelInfo)
 	slog.SetDefault(logger)
 
 	db, err := connectDB()
@@ -55,6 +55,7 @@ func main() {
 	server.RegisterEndpoints()
 
 	errChan := server.Run()
+	slog.Info("Server is running")
 	err = <-errChan
 	if err != nil {
 		slog.Error("Server exited")

@@ -6,10 +6,13 @@ clean:
 	rm -rf ./docker_log/*
 
 docker-up:
-	docker-compose up -d --remove-orphans
+	docker compose up -d --remove-orphans
 
 docker-down:
-	docker-compose down
+	docker compose down
+
+docker-build:
+	docker compose build --no-cache
 
 run-local: swagger
 	go run ./cmd/api
