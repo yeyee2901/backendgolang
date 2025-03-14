@@ -1,3 +1,56 @@
+# Running Instructions
+
+The app is "packaged" using Docker & `docker compose`. I have prepared several make file targets to make things easier:
+
+```bash
+# cleans any log & (IMPORTANT) docker database volume
+make clean
+
+# build the docker images
+make docker-build
+
+# fire up the containers, runs in background
+make docker-up
+
+# shutdown
+make docker-down 
+```
+
+Server can be accessed with host: `127.0.0.1:3000`. The documentation (swagger OpenAPI) can be accessed from `127.0.0.1:3000/swagger/index.html`
+
+As an additional note, we can change the scheduler interval from `docker-compose.yml`:
+```yaml
+...
+...
+  scheduler:
+    build:
+      context: .
+      dockerfile: scheduler.Dockerfile
+    restart: always
+
+    # NOTE: set the scheduling here
+    environment:
+      - SCHEDULER_REFRESH_URL=http://api:3000/api/v1/indego-data-fetch-and-store-it-db
+      - SCHEDULER_REFRESH_INTERVAL=1h
+      # - SCHEDULER_REFRESH_INTERVAL=3m
+    networks:
+      - epiphyte-corp-dot-net
+    depends_on:
+      - postgresdb
+...
+...
+```
+
+Application logs can be observed from `docker_log/app.log`. This has a `service` key that can be used to identify which service produce which log.
+```bash
+tail -f docker_log/app.log
+```
+
+# Main Techs Used 
+- [Gin](https://github.com/gonic-gin/gin) - Fast & Simple HTTP Web Server Framework for Golang.
+- [golang-migrate](https://github.com/golang-migrate/migrate) - manage sequential migration scripts, can be used as standalone CLI, a library, and there is also docker image available for it, which is a good thing for `docker compose` situation.
+- For logging, I use a combination of [lumberjack](https://github.com/natefinch/lumberjack) & `slog` (builtin `slog` package).
+
 ## Golang  Backend Challenge
 
 [Indego](https://www.rideindego.com) is Philadelphia's bike-sharing program, with many bike stations in the city.
