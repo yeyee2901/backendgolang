@@ -1,6 +1,6 @@
 module github.com/yeyee2901/backendgolang/rideindego-weather-api
 
-go 1.24.1
+go 1.22.5
 
 require (
 	github.com/gin-gonic/gin v1.10.0

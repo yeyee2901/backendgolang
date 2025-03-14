@@ -1,3 +1,4 @@
 log/*
+docker_log
 sql/data
 docs/*

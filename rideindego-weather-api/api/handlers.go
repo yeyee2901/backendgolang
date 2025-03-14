@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -79,10 +80,9 @@ func (api *APIServer) HandleRefreshData(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }
 
-// HandleRefreshData gin handler
+// HandleSearchByTime gin handler
 // @Summary Get data based on time
 // @Tags API
-// @Description fetches new ride-indego & weather data, then stores it in database
 // @Param Authorization header string true "Bearer teehee-what-are-you-looking-for"
 // @Param at query string true "2006-01-02T15:04:05Z"
 // @Produce json
@@ -90,7 +90,7 @@ func (api *APIServer) HandleRefreshData(c *gin.Context) {
 // @Success 200 {object} APIResponse
 // @Router /api/v1/stations [GET]
 func (api *APIServer) HandleSearchByTime(c *gin.Context) {
-	logger := slog.Default().With("endpoint", "POST /api/v1/v1/stations")
+	logger := slog.Default().With("endpoint", "GET /api/v1/stations")
 	searchCtx, cancel := context.WithCancel(c)
 	defer cancel()
 
@@ -100,9 +100,70 @@ func (api *APIServer) HandleSearchByTime(c *gin.Context) {
 		return
 	}
 
-	// TODO: search ride indego data (should return the same JSON as the API)
+	// search ride indego data (should return the same JSON as the API)
 	ride := rideindego.NewRideIndeGoService(api.config.RideIndegoBaseURL, api.dbConn)
 	rideData, err := ride.Search(searchCtx, rideindego.SearchParam{At: at})
+	if err != nil {
+		if errors.Is(err, rideindego.ErrDataNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "no matching ride indego data found"})
+			return
+		}
+
+		logger.Error("failed to get data", "error", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+	}
+
+	// search weather data (should return the same JSON as the API)
+	weather := openweather.NewOpenWeather(api.config.OpenWeatherAPIKey, api.config.OpenWeatherURL, api.dbConn)
+	weatherData, err := weather.Search(searchCtx, openweather.SearchParam{At: at})
+	if err != nil {
+		if errors.Is(err, openweather.ErrDataNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "no matching weather data found"})
+			return
+		}
+
+		logger.Error("failed to get data", "error", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+	}
+
+	c.JSON(http.StatusOK, APIResponse{
+		At:       at,
+		Stations: *rideData,
+		Weather:  *weatherData,
+	})
+}
+
+// HandleSearchByTimeKioskID gin handler
+// @Summary Get data based on time and kiosk ID
+// @Tags API
+// @Param Authorization header string true "Bearer teehee-what-are-you-looking-for"
+// @Param at query string true "2006-01-02T15:04:05Z"
+// @Param kioskId path string true "ex: 3065"
+// @Produce json
+// @Consume json
+// @Success 200 {object} APIResponse
+// @Router /api/v1/stations/{kioskId} [GET]
+func (api *APIServer) HandleSearchByTimeKioskID(c *gin.Context) {
+	logger := slog.Default().With("endpoint", "GET /api/v1/stations/{kioskId}")
+	searchCtx, cancel := context.WithCancel(c)
+	defer cancel()
+
+	// simple validation
+	at, err := time.Parse(time.RFC3339, c.Query("at"))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid format for 'at' parameter"})
+		return
+	}
+
+	kioskId := c.Param("kioskId")
+	if _, err := strconv.Atoi(kioskId); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid format for 'kioskId' parameter. Must be numeric"})
+		return
+	}
+
+	// search ride indego data (should return the same JSON as the API)
+	ride := rideindego.NewRideIndeGoService(api.config.RideIndegoBaseURL, api.dbConn)
+	rideData, err := ride.Search(searchCtx, rideindego.SearchParam{At: at, KioskID: kioskId})
 	if err != nil {
 		if errors.Is(err, rideindego.ErrDataNotFound) {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "no matching ride indego data found"})

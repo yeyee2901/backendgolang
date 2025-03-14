@@ -31,7 +31,7 @@ func main() {
 
 	db, err := connectDB()
 	if err != nil {
-		slog.Error("Cannot connect to database")
+		slog.Error("Cannot connect to database", "error", err)
 		os.Exit(1)
 	}
 
@@ -63,10 +63,16 @@ func main() {
 }
 
 func connectDB() (*sqlx.DB, error) {
-	return sqlx.Connect("postgres", utils.BuildDatasourceName(utils.DataSource{
+	dsn := utils.BuildDatasourceName(utils.DataSource{
 		User:     os.Getenv("POSTGRESQL_USERNAME"),
 		Password: os.Getenv("POSTGRESQL_PASSWORD"),
 		Host:     os.Getenv("POSTGRESQL_HOST"),
 		Database: os.Getenv("POSTGRESQL_DATABASE"),
-	}))
+	})
+	db, err := sqlx.Connect("postgres", dsn)
+	if err != nil {
+		return nil, fmt.Errorf("cannot connect to %s : %w", dsn, err)
+	}
+
+	return db, nil
 }

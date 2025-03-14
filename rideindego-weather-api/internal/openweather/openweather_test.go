@@ -98,7 +98,7 @@ func TestSearch(t *testing.T) {
 
 	// TEST: for clarity, search from previous hour
 	// since the API says the oldest data is in 1 hour
-	prevHour := time.Now().Add(-60 * time.Hour)
+	prevHour := time.Now().Add(-1 * time.Hour)
 	t.Log("prevHour:", prevHour.Unix())
 	data, err := weather.Search(context.Background(), SearchParam{At: prevHour})
 	if err != nil {

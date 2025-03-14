@@ -7,6 +7,7 @@ services:
     volumes:
       - ./sql/data:/bitnami/postgresql
     ports: 
+      - '5432:5432'
       - '34567:5432'
     networks:
       - epiphyte-corp-dot-net
@@ -30,6 +31,28 @@ services:
       postgresdb:
         condition: service_healthy
 
+  api:
+    build:
+      context: .
+      dockerfile: api.Dockerfile
+    restart: always
+    env_file: "build.env"
+
+    # overwrite the env values from build.env file
+    # the 'environment' properties has higher priority
+    environment:
+      - SERVER_LISTENER=0.0.0.0:3000
+      - POSTGRESQL_HOST=postgresdb:5432
+      - GIN_MODE=release
+    ports:
+      - '3000:3000'
+    networks:
+      - epiphyte-corp-dot-net
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    volumes:
+      - ./docker_log:/log
 
 networks:
   epiphyte-corp-dot-net:

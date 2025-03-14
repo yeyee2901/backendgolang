@@ -2,6 +2,8 @@
 
 clean:
 	rm -rf ./sql/data
+	rm -rf ./log/*
+	rm -rf ./docker_log/*
 
 docker-up:
 	docker-compose up -d --remove-orphans
