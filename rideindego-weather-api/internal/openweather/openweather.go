@@ -85,6 +85,10 @@ func (ow *OpenWeatherService) saveData(ctx context.Context, dataToSave *APIRespo
 		SysCountry:    dataToSave.Sys.Country,
 		SysSunrise:    dataToSave.Sys.Sunrise,
 		SysSunset:     dataToSave.Sys.Sunset,
+		ID:            dataToSave.ID,
+		Timezone:      dataToSave.Timezone,
+		Name:          dataToSave.Name,
+		Cod:           dataToSave.Cod,
 	}
 
 	// OPTIMIZE: prepare sized array

@@ -4,6 +4,7 @@ type TableWeatherMaster struct {
 	// FetchID : identifies which data group does this belongs to
 	FetchID string `db:"fetch_id"`
 
+	ID            int     `db:"id"`
 	Coord         string  `db:"coord"`
 	Base          string  `db:"base"`
 	MainTemp      float64 `db:"main_temp"`
@@ -25,6 +26,9 @@ type TableWeatherMaster struct {
 	SysCountry    string  `db:"sys_country"`
 	SysSunrise    int     `db:"sys_sunrise"`
 	SysSunset     int     `db:"sys_sunset"`
+	Timezone      int     `db:"timezone"`
+	Name          string  `db:"name"`
+	Cod           int     `db:"cod"`
 }
 
 type TableWeatherDetails struct {

@@ -1,5 +1,6 @@
 CREATE TABLE openweather_master(
     fetch_id uuid NOT NULL,
+    id int NOT NULL,
     coord geometry NOT NULL,
     base varchar,
     main_temp float,
@@ -21,6 +22,9 @@ CREATE TABLE openweather_master(
     sys_country varchar,
     sys_sunrise integer,
     sys_sunset integer,
+    timezone int,
+    name varchar,
+    cod int,
 
     PRIMARY KEY(fetch_id)
 );

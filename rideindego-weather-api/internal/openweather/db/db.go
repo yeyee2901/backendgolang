@@ -5,11 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type DBWeatherProvider interface {
+	SearchWeather(context.Context, time.Time) (*SearchWeatherResult, error)
 	StoreDatas(context.Context, *TableWeatherMaster, []*TableWeatherDetails) error
 }
 
@@ -59,6 +61,7 @@ func (d *dbWeather) saveMaster(tx *sqlx.Tx, data *TableWeatherMaster) error {
         INSERT INTO openweather_master
         (
             fetch_id,
+            id,
             coord,
             base,
             main_temp,
@@ -79,11 +82,15 @@ func (d *dbWeather) saveMaster(tx *sqlx.Tx, data *TableWeatherMaster) error {
             sys_id,
             sys_country,
             sys_sunrise,
-            sys_sunset
+            sys_sunset,
+            timezone,
+            name,
+            cod
         )
         VALUES
         (
             :fetch_id,
+            :id,
             :coord,
             :base,
             :main_temp,
@@ -104,7 +111,10 @@ func (d *dbWeather) saveMaster(tx *sqlx.Tx, data *TableWeatherMaster) error {
             :sys_id,
             :sys_country,
             :sys_sunrise,
-            :sys_sunset
+            :sys_sunset,
+            :timezone,
+            :name, 
+            :cod
         )
     `
 

@@ -12,6 +12,8 @@ import (
 	"github.com/yeyee2901/backendgolang/rideindego-weather-api/internal/rideindego/db"
 )
 
+var ErrDataNotFound = fmt.Errorf("rideindego: data not found")
+
 type RideIndeGoService struct {
 	baseURL string
 	store   db.DBRideIndegoProvider

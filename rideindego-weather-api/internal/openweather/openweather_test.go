@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
@@ -67,6 +68,44 @@ func TestRefreshData(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestSearch(t *testing.T) {
+	err := godotenv.Load("../../build.env")
+	if err != nil {
+		t.Fatal(err)
+	}
+	apiKey := os.Getenv("OPENWEATHER_API_KEY")
+	baseURL := os.Getenv("OPENWEATHER_URL")
+	db, err := connectDB()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// t.Cleanup(func() {
+	// 	err := cleanDatabase(db)
+	// 	if err != nil {
+	// 		t.Log("[WARNING] failed to clean database")
+	// 	}
+	// })
+
+	// fill with fresh data first
+	weather := NewOpenWeather(apiKey, baseURL, db)
+	err = weather.RefreshData(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// TEST: for clarity, search from previous hour
+	// since the API says the oldest data is in 1 hour
+	prevHour := time.Now().Add(-60 * time.Hour)
+	t.Log("prevHour:", prevHour.Unix())
+	data, err := weather.Search(context.Background(), SearchParam{At: prevHour})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(data)
 }
 
 func connectDB() (*sqlx.DB, error) {

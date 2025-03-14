@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -18,6 +19,10 @@ func TestStoreData(t *testing.T) {
 		testFetchID = uuid.NewString()
 		testMaster  = &TableWeatherMaster{
 			FetchID:       testFetchID,
+			Name:          "asldkajsd",
+			Cod:           12301928,
+			Timezone:      10291284,
+			ID:            100,
 			Coord:         fmt.Sprintf("POINT(%f %f)", 0.123, 0.345),
 			Base:          "test",
 			MainTemp:      100,
@@ -75,14 +80,14 @@ func TestStoreData(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// check for sample data
-	q := `SELECT * FROM openweather_master WHERE fetch_id = $1 LIMIT 1`
-	res := new(TableWeatherMaster)
-	err = db.Get(res, q, testFetchID)
+	// TEST: check for sample data
+	at := time.Unix(int64(testMaster.Dt), 0)
+	res, err := weather.SearchWeather(context.Background(), at)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("openweather_master: ", res)
+
+	t.Logf("details: %+v", res.Details)
 }
 
 func connectDB() (*sqlx.DB, error) {

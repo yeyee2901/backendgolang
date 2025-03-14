@@ -48,6 +48,7 @@ func (api *APIServer) RegisterMiddlewares() {
 
 func (api *APIServer) RegisterEndpoints() {
 	api.gin.POST("/api/v1/indego-data-fetch-and-store-it-db", api.HandleRefreshData)
+	api.gin.GET("/api/v1/stations", api.HandleSearchByTime)
 
 	// register swagger
 	docs.SwaggerInfo.Host = api.config.Listener
