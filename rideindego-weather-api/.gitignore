@@ -2,3 +2,4 @@ log/*
 docker_log
 sql/data
 docs/*
+.DS_Store

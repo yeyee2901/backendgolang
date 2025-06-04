@@ -185,6 +185,7 @@ func (api *APIServer) HandleSearchByTimeKioskID(c *gin.Context) {
 
 		logger.Error("failed to get data", "error", err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
 	}
 
 	c.JSON(http.StatusOK, APIResponse{
